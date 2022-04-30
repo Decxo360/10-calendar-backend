@@ -9,20 +9,24 @@ const { generarJWT } = require('../helpers/jwt');
 const crearUsuario = async(req,res = express.response)=>{
 
     const {mail, password} = req.body;
-
+    
     try{ 
         let usuario = await Usuario.findOne({mail});
+        
         if(usuario){
             return res.status(400).json({
                 ok:false,
                 msg:'Un usuario existe con ese correo'
             });
         }
+        
         usuario = new Usuario(req.body);
         const salt = bcrypt.genSaltSync();
-        usuario.password = bcrypt.hashSync(password,salt);
-        await usuario.save();
         
+        usuario.password = bcrypt.hashSync(password,salt);
+        
+        
+        const result = await usuario.save();
         const token = await generarJWT(usuario.id, usuario.name);
         
         res.status(201).json({
